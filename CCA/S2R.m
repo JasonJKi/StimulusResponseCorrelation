@@ -26,8 +26,8 @@ function [U, V, H, W, r, p, Rxx, Ryy]=S2R(XTrain,YTrain,regParam,XTest,YTest)
 
 if ~ismatrix(XTrain), error('X must have two dimensions'); end;
 if ~ismatrix(YTrain), error('Y must have two dimensions'); end;
-if size(XTrain,1)>size(XTrain,2), XTrain=XTrain.'; warning('transposing X'); end;
-if size(YTrain,1)>size(YTrain,2), YTrain=YTrain.'; warning('transposing Y'); end;
+if size(XTrain,1)>size(XTrain,2), XTrain=XTrain.'; display('transposing X'); end;
+if size(YTrain,1)>size(YTrain,2), YTrain=YTrain.'; display('transposing Y'); end;
 
 if ~exist('XTest','var')||~exist('XTest','var');
     XTest=XTrain';YTest=YTrain';
