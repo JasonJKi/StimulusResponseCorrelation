@@ -1,7 +1,7 @@
-Stimulus to Response, Canonical Correlated Analysis(STIM2EEG-CCA)
+Stimulus to Response, Canonical Correlated Analysis (STIM2RESPONSE-CCA)
 =====
 
-MATLAB package for Canonoically Correlated Analysis for Stimulus and Brain Response
+MATLAB package for canonoical correlation analysis for stimulus and brain response
 
 Execution details, and data description in S2Rdemo.m
 
