@@ -49,7 +49,7 @@ for iSubj=1:nSubjects;
     end
     
     % [eeg mask] = rejectEegArtifact(eeg,nRemove,sRemove,fs)
-    [EEG(:,:,iSubj) mask(:,:,iSubj)] = rejectEegArtifact(EEG(:,:,iSubj),2,3,fsRef);
+    [EEG(:,:,iSubj) mask(:,:,iSubj)] = rejectEegArtifact(EEG(:,:,iSubj),fsRef);
 end
 
 end

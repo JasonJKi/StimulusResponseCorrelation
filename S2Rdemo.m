@@ -20,7 +20,7 @@ featureNames = {'optical flow', 'luminance', 'sound envelope'}; % stimuls featur
 featureIndx=1; % index of stimulus feature (1 - optical flow, 2 - luminance, 3 - sound envelope)
 
 % create training and test set
-responseTrain=permute(EEG(:,:,2:nSubjects),[2 1 3]);
+responseTrain=permute(EEG(:,:,1:nSubjects),[2 1 3]);
 responseTrain=responseTrain(:,:)'; responseTest=EEG(:,:,1);
 stimTest=X(:,:,featureIndx); 
 stimTrain=repmat(X(:,:,featureIndx),nSubjects-1,1); 
