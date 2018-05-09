@@ -3,7 +3,7 @@ Stimulus to Response Correlation Analysis
 
 MATLAB package for canonoical correlation analysis for stimulus and brain response
 
-Execution details, and data description in S2Rdemo.m
+Execution details, and data description in stimulus-response-correlation-analysis-demo.m
 
 
 Citation
