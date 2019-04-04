@@ -1,6 +1,5 @@
 ## .gitignore
 
+tmp/
+
 # for stimulus and video data 
-Data/*.mp4
-Data/ddaFeaturesRaw
-Data/ddaResponseRaw
