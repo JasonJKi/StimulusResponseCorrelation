@@ -12,4 +12,4 @@ Extracting multidimensional stimulus-response correlations using hybrid encoding
 JP Dmochowski, J Ki, P DeGuzman, P Sajda, LC Parra - NeuroImage, 2017 [Text Here](http://www.sciencedirect.com/science/article/pii/S1053811917304299)
 
 ## Contact us
-* [Neural Engineering Group](http://neuralengr.com/), City College of New York
+* Jason Ki, ki.jasonj@gmail.com
