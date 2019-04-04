@@ -1,0 +1,3 @@
+[submodule "libs/ScalpPlot"]
+	path = libs/ScalpPlot
+	url = https://github.com/JasonJKi/ScalpPlot.git
