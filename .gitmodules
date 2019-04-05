@@ -1,3 +1,4 @@
 [submodule "libs/ScalpPlot"]
+    recurse = true
 	path = libs/ScalpPlot
 	url = https://github.com/JasonJKi/ScalpPlot.git

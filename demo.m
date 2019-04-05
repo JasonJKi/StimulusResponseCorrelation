@@ -1,38 +1,61 @@
+setup install
+
 %{
  This script demonstrates feature extraction of time locked eeg and 
  audio-visual stimulus using the canonical correlation analyisis from 
  Dmochowski et al. 2017 (Neuro Image). 
 %}
-setup install
  
-% load EEG data of movie.
+% load EEG data of movie
 load('data/ddaResponseProcessed.mat','EEG') 
 nSubjects=size(EEG,3); nChannels=size(EEG,2); 
 
 % load stimulus data
-% stimulus info: scene from Dog Day Afternoon (Sidney Lumet, 1975), t = 325.8750s, fs =24
-load('data/ddaFeaturesProcessed.mat','X','fs');
+load('data/ddaFeaturesProcessed.mat','X','fs'); % stimulus info: scene from Dog Day Afternoon (Sidney Lumet, 1975), t = 325.8750s, fs =24
 featureNames = {'optical flow', 'luminance', 'sound envelope'}; % stimuls features
 featureIndx=1; % index of stimulus feature (1 - optical flow, 2 - luminance, 3 - sound envelope)
+
 % create training and test set
-responseTrain=permute(EEG,[2 1 3]);
-responseTrain=responseTrain(:,:)'; responseTest=EEG(:,:,1);
-stimTest=X(:,:,featureIndx); 
-stimTrain=repmat(X(:,1:nSubjects,featureIndx),nSubjects,1); 
+y = EEG;
+yTrain = permute(y, [2 1 3]);
+yTrain = yTrain(:, :)'; 
+yTest = y(:,:,1);
 
-xTrain = stimTrain;
-yTrain = responseTrain;
-regParam=[10 10]; % regularization parameters. regParam =[kX kY]; 
-[U, V, H, W, r, p, Rxx, Ryy]=S2R(xTrain,responseTrain,regParam,stimTest,responseTest);
-figure(1)
-S2RMap(double(H),double(W),3,r,p,fs,double(Ryy),double(Rxx),'BioSemi32.loc',0); %data type converted to double for topoplot functions
-[A, B, Rxx, Ryy, Ryx,  Rxy, stats] = canonCorrRegularized(xTrain,yTrain,10,10);
-figure(2)
-S2RMap(double(A),double(B),3,r,p,fs,double(Ryy),double(Rxx),'BioSemi32.loc',0); %data type converted to double for topoplot functions
+x = X(:,:,featureIndx); 
+xTrain = repmat(x(:,1:nSubjects,featureIndx),nSubjects,1); 
+xTest = x;
 
+kx = 10; ky = 10;
 ccaEstimator = CCA(xTrain, yTrain);
-ccaEstimator.setHyperParams(10,10)
-ccaEstimator.svdRegularize('y')
+ccaEstimator.setHyperParams(kx,ky);
 ccaEstimator.compute();
 
-S2RMap(double(A),double(B),3,r,p,fs,double(Ryy),double(Rxx),'BioSemi32.loc',0); %data type converted to double for topoplot functions
+[rhos, p] = ccaEstimator.fit(xTest, yTest);
+
+% Compute EEG forward model.
+w = ccaEstimator.B; % Spatial Weight
+h = ccaEstimator.A;
+ryy = ccaEstimator.covMatrix.ryy;
+A = forwardModel(w, ryy);
+
+fig = figure(1);clf;
+
+locationInfo = readLocationFile(LocationInfo(), 'BioSemi32.loc');
+scalpPlot = ScalpPlot(locationInfo);
+
+subplot(2,3,1)
+scalpPlot.draw(A(:,1)); 
+
+subplot(2,3,2)
+scalpPlot.draw(A(:,2));
+
+subplot(2,3,3)
+scalpPlot.draw(A(:,3));
+subplot(2,3,4)
+plot((0:fs-1)/fs,h(1:1*fs,1));
+
+subplot(2,3,5)
+plot((0:fs-1)/fs,h(1:1*fs,2));
+
+subplot(2,3,6)
+plot((0:fs-1)/fs,h(1:1*fs,3));

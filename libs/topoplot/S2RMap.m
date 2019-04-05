@@ -12,7 +12,8 @@ function S2RMap(H,W,nComp,r,p,fs,Ryy,Rxx,locFile,forward)
 % locFile - specify locFile to be used for topoplot
 % forward - 0 or 1, to display forward model
 
-colors={'k','r','g','b','r','y'};
+colors = {'k','r','g','b','r','y'};
+
 if forward
     A=Ryy*W(:,1:nComp)*inv(W(:,1:nComp)'*Ryy*W(:,1:nComp));
     A=Ryy*W(:,1:nComp)*(W(:,1:nComp)'/Ryy*W(:,1:nComp));
