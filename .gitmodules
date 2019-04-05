@@ -2,3 +2,8 @@
     recurse = true
 	path = libs/ScalpPlot
 	url = https://github.com/JasonJKi/ScalpPlot.git
+
+[submodule "libs/CCA"]
+    recurse = true
+	path = libs/CCA
+	url = https://github.com/JasonJKi/CanonCorrRegularized.git

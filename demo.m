@@ -1,17 +1,16 @@
 setup install
-
 %{
  This script demonstrates feature extraction of time locked eeg and 
  audio-visual stimulus using the canonical correlation analyisis from 
  Dmochowski et al. 2017 (Neuro Image). 
 %}
- 
+
 % load EEG data of movie
-load('data/ddaResponseProcessed.mat','EEG') 
+load('data/ddaEEGProcessed.mat','EEG') 
 nSubjects=size(EEG,3); nChannels=size(EEG,2); 
 
 % load stimulus data
-load('data/ddaFeaturesProcessed.mat','X','fs'); % stimulus info: scene from Dog Day Afternoon (Sidney Lumet, 1975), t = 325.8750s, fs =24
+load('data/ddaVideoFeaturesProcessed.mat','X','fs'); % stimulus info: scene from Dog Day Afternoon (Sidney Lumet, 1975), t = 325.8750s, fs =24
 featureNames = {'optical flow', 'luminance', 'sound envelope'}; % stimuls features
 featureIndx=1; % index of stimulus feature (1 - optical flow, 2 - luminance, 3 - sound envelope)
 
@@ -25,6 +24,7 @@ x = X(:,:,featureIndx);
 xTrain = repmat(x(:,1:nSubjects,featureIndx),nSubjects,1); 
 xTest = x;
 
+% Create a estimator to perform stimulus response correlation.
 kx = 10; ky = 10;
 ccaEstimator = CCA(xTrain, yTrain);
 ccaEstimator.setHyperParams(kx,ky);
@@ -38,10 +38,11 @@ h = ccaEstimator.A;
 ryy = ccaEstimator.covMatrix.ryy;
 A = forwardModel(w, ryy);
 
-fig = figure(1);clf;
-
+% Draw the forward model and temporal filter.
 locationInfo = readLocationFile(LocationInfo(), 'BioSemi32.loc');
 scalpPlot = ScalpPlot(locationInfo);
+
+fig = figure(1);clf;
 
 subplot(2,3,1)
 scalpPlot.draw(A(:,1)); 
@@ -51,6 +52,7 @@ scalpPlot.draw(A(:,2));
 
 subplot(2,3,3)
 scalpPlot.draw(A(:,3));
+
 subplot(2,3,4)
 plot((0:fs-1)/fs,h(1:1*fs,1));
 
