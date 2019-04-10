@@ -1,28 +1,19 @@
 setup install
-%{
- This script demonstrates feature extraction of time locked eeg and 
- audio-visual stimulus using the canonical correlation analyisis from 
- Dmochowski et al. 2017 (Neuro Image). 
-%}
 
-% load EEG data of movie
-load('data/ddaEEGProcessed.mat','EEG') 
-nSubjects=size(EEG,3); nChannels=size(EEG,2); 
+% load in video stimulus data
+videoFilepath = 'res/data/video_1.avi';
+video = VideoReader(videoFilepath);
 
-% load stimulus data
-load('data/ddaVideoFeaturesProcessed.mat','X','fs'); % stimulus info: scene from Dog Day Afternoon (Sidney Lumet, 1975), t = 325.8750s, fs =24
-featureNames = {'optical flow', 'luminance', 'sound envelope'}; % stimuls features
-featureIndx=1; % index of stimulus feature (1 - optical flow, 2 - luminance, 3 - sound envelope)
+vidFeatureExtractor = setVideoReader(Extractor(),video);
+vidFeatureExtractor.add(TemporalContrast())
+vidFeatureExtractor.add(OpticalFlow());
+vidFeatureExtractor.compute();
 
-% create training and test set
-y = EEG;
-yTrain = permute(y, [2 1 3]);
-yTrain = yTrain(:, :)'; 
-yTest = y(:,:,1);
+temporalContrast = vidFeatureExtractor.get(1);
+opticFlow = vidFeatureExtractor.get(2);
 
-x = X(:,:,featureIndx); 
-xTrain = repmat(x(:,1:nSubjects,featureIndx),nSubjects,1); 
-xTest = x;
+responseFilepath = 'res/data/eeg_1.mat';
+eeg = load(responseFilepath, 'duration', 'data', 'eventMarker', 'fs');
 
 % Create a estimator to perform stimulus response correlation.
 kx = 10; ky = 10;
