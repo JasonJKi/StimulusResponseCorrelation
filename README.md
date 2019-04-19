@@ -1,9 +1,8 @@
 Stimulus to Response Correlation Analysis
 =====
+TBD
 
-MATLAB package for canonoical correlation analysis for stimulus and brain response
-
-Execution details, and data description in stimulus-response-correlation-analysis-demo.m
+See demo.m for prelimnary look in to this repository.
 
 
 Citation
