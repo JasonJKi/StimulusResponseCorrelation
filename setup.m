@@ -15,6 +15,7 @@ if nargin > 0
         case 'remove'
             warning('off')
             rmpath(libsPath);
+            rmpath(srcPath);
             disp('Successfully removed libs from path.')
             warning('on')
             statusStr = [str1 'd'];

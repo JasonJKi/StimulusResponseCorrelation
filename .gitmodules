@@ -1,6 +1,6 @@
 [submodule "src/ScalpPlot"]
     recurse = true
-	path = libs/ScalpPlot
+	path = lib/ScalpPlot
 	url = https://github.com/JasonJKi/ScalpPlot.git
 
 [submodule "src/CCA"]
@@ -12,6 +12,5 @@
     recurse = true
 	path = src/VideoFeatures
 	url = https://github.com/JasonJKi/VideoFeatures.git
-[submodule "src/VideoFeatures/VideoFeatures"]
-	path = src/VideoFeatures/VideoFeatures
-	url = https://github.com/JasonJKi/VideoFeatures.git
+
+
