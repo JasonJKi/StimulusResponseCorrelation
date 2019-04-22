@@ -1,12 +1,32 @@
 setup install
 
 % load in video stimulus data
-videoFilepath = 'res/data/video_1.avi';
-video = VideoReader(videoFilepath);
+videoFilepath = 'res/data/video_1.avi'; 
 
-vidFeatureExtractor = setVideoReader(Extractor(),video);
-vidFeatureExtractor.add(TemporalContrast())
-vidFeatureExtractor.add(OpticalFlow());
+Farneback = opticalFlowFarneback('NumPyramidLevels', 3, ...
+    'PyramidScale', 0.5, 'NumIterations', 3, ...
+    'NeighborhoodSize', 5, 'FilterSize', 15);
+
+HS = opticalFlowHS('Smoothness', 1, 'MaxIteration', 10, 'VelocityDifference', 0);
+
+LK = opticalFlowLK('NoiseThreshold', 0.0039);
+
+LKDoG = opticalFlowLKDoG('NumFrames', 3, 'ImageFilterSigma', 1.5, ...
+    'GradientFilterSigma', 1, 'NoiseThreshold', 0.0039);
+
+% Create a video object for the video stimulus.
+% videoArray = initFromVideoReader(Video(), VideoReader(videoFilepath));
+% vidFeatureExtractor = Extractor(videoArray)
+
+videoReader = VideoReader(videoFilepath); % VideoReader is Matlab's multimedia reader.
+
+vidFeatureExtractor = Extractor(videoReader);
+vidFeatureExtractor.add(TemporalContrast());
+vidFeatureExtractor.add(OpticalFlow(Farneback));
+vidFeatureExtractor.add(OpticalFlow(HS));
+vidFeatureExtractor.add(OpticalFlow(LK));
+vidFeatureExtractor.add(OpticalFlow(LKDoG));
+
 vidFeatureExtractor.compute();
 
 temporalContrast = vidFeatureExtractor.get(1);

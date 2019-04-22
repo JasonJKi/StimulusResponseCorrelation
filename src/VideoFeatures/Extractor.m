@@ -3,28 +3,32 @@ classdef Extractor < handle
     %   Detailed explanation goes here
     
     properties
-        videoReader
+        video
         
         % Video dimension.
         height;
         width;
-        numChannels;
         numFrames;
         frameRate;
         duration;
-        videoFormat;
+        numChannels;
         
         videoFeatures = {};
         numfeatures = 0;
         resizeRatio = 1;
         
         iFrame = 1;
+        
     end
     
     properties (Access = public, Constant)
         % Available feature extraction method info data
     end
-        
+
+    properties (Access = private) 
+            messageStr = ''
+    end
+    
     properties (Access = private)
         % Video method types
         currentFrameIndex = [];
@@ -36,28 +40,52 @@ classdef Extractor < handle
     
     methods
         % Instantiate video feature extractor class 
-        function this = Extractor()
+        function this = Extractor(video)
             if nargin < 1
                 return;
             end
+            
+            if isa(video, 'Video')                
+                setVideoInfo(this, video);
+            elseif isa(video, 'VideoReader') 
+                setVideoReaderInfo(this, video);
+            else
+                error('Input to Extractor must be type Video or VideoReader')                
+            end
         end
         
-        function  this = setVideoReader(this, videoReader);
-            setVideoInfo(this, videoReader)
+        function  this = setVideoReader(this, videoReader)
+            setVideoReaderInfo(this, videoReader);
+        end
+        
+        function this = setVideoInfo(this, video)
+            this.video = video;
+            this.height = video.width;
+            this.width =  video.height;
+            this.frameRate = video.frameRate;
+            this.duration = video.duration;
+            this.numFrames = video.numFrames;
+            this.numChannels = video.numChannels;
         end
         
         % Set video dimensions
-        function this = setVideoInfo(this, video)
-            this.videoReader = video;
+        function this = setVideoReaderInfo(this, video)
+            this.video = video;
             this.height = video.Width;
             this.width =  video.Height;
             this.frameRate = video.FrameRate;
             this.duration = video.Duration;
+            
             this.numFrames = video.Duration*video.FrameRate;
-            this.videoFormat = video.VideoFormat;
+            
+            if strcmp(video.VideoFormat, 'Grayscale')
+                this.numChannels = 1;
+            else
+                this.numChannels = 3;
+            end
         end
         
-        function this = add(this, method)
+        function add(this, method)
             videoFeature = VideoIterator(method, this.numFrames);
             this.videoFeatures = [this.videoFeatures, {videoFeature}];
             this.numfeatures = this.numfeatures + 1;
@@ -95,36 +123,6 @@ classdef Extractor < handle
             end
         end
         
-        function status = hasFrame(this)
-            status = false;
-            video = this.video;
-            if this.currentFrameIndex > this.numFrames
-                return
-            end
-            
-            this.currentFrame = getVideoFrame(this, video);
-            
-            if this.imageResized 
-                this.currentFrame = imresize(this.currentFrame, this.resizeRatio);
-            end
-            
-            if ~isempty(this.currentFrame)
-                status = true;
-                this.currentFrameIndex = this.currentFrameIndex + 1;
-            end
-        end
-        
-        % Index a specific frame without using matlab's index convention
-        function frame = getVideoFrame(this, video, frameIndex)
-            if nargin < 3
-                frameIndex =  this.currentFrameIndex;
-            end
-            % video - [width, height, ..., numFrame]
-            % Colons for indexing multi-dimensional matlab array
-            
-            frame = squeeze(video(frameIndex, this.colonsForMultiDimIndex{:}));
-        end
-        
         function initVideoExtraction(this, video)
             setVideoDims(this, size(video));
             this.currentFrame = [];
@@ -132,8 +130,14 @@ classdef Extractor < handle
         end
         
         function initExtractionMethods(this)
+            msg = sprintf('\nPerforming Extractions for \n');
+            fprintf(msg);
+
             for iFeature = 1:this.numfeatures
-                reset(this.videoFeatures{iFeature});
+                vidFeature = this.videoFeatures{iFeature};
+                msg = sprintf(['%d. ' vidFeature.name,' ' , vidFeature.methodName, '\n'], iFeature);
+                fprintf(msg)
+                reset(vidFeature);
             end
         end
         
@@ -144,34 +148,41 @@ classdef Extractor < handle
             end
         end
         
-        function frame = readFrame(this, video)
-            frame = readFrame(video);
-            this.iFrame = this.iFrame + 1;
-            
-            if mod(this.iFrame, 100) == 0
-                disp(this.iFrame)
-            end
-        end
-        
         % Start the computation of the video feature extraction.
         function compute(this)
-                        
-            if ~isempty(this.videoReader);
-                video = this.videoReader;
-            else
-                video = this;
-            end
             
-            while hasFrame(video)
-                frame = readFrame(this, video);
+            
+            this.iFrame = 1;
+            initExtractionMethods(this)
+            
+            while hasFrame(this.video)
+                frame = readFrame(this.video);
                 for iFeature = 1:this.numfeatures
                     feature = get(this.videoFeatures{iFeature});
                     output = feature.compute(frame);
                     this.videoFeatures{iFeature}.addFrame(output);
                 end
                 
+                statusMessage(this);
+                this.iFrame = this.iFrame + 1;
             end
             
+        end
+        
+        function statusMessage(this)
+            if this.iFrame == 1
+               this.messageStr = '';
+            end
+            
+            if ~mod(this.iFrame,100) || (this.iFrame == 1) || this.iFrame == this.numFrames
+                msg = sprintf('Processed %d/%d Frames', this.iFrame, this.numFrames);
+                fprintf([this.messageStr, msg]);
+                this.messageStr = repmat(sprintf('\b'), 1, length(msg));
+            end
+        end
+        
+        function reset(this)
+            this.currentFrameIndex = [];
         end
         
     end

@@ -1,9 +1,14 @@
-[submodule "libs/ScalpPlot"]
+[submodule "src/ScalpPlot"]
     recurse = true
 	path = libs/ScalpPlot
 	url = https://github.com/JasonJKi/ScalpPlot.git
 
-[submodule "libs/CCA"]
+[submodule "src/CCA"]
     recurse = true
-	path = libs/CCA
+	path = src/CCA
 	url = https://github.com/JasonJKi/CanonCorrRegularized.git
+
+[submodule "src/VideoFeatures"]
+    recurse = true
+	path = src/VideoFeatures
+	url = https://github.com/JasonJKi/VideoFeatures.git

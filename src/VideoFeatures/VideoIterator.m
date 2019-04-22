@@ -6,10 +6,13 @@ classdef VideoIterator < handle
         name
         param
         paramLabel
+        methodName
         numFeatures
         numFrames
         
         video
+        
+        indexer
     end
     
     properties (Access = private, Hidden = true)
@@ -29,17 +32,25 @@ classdef VideoIterator < handle
             this.numFeatures = feature.numOutputs;
             this.paramLabel = feature.paramLabel;
             this.numFrames = numFrames;
+            this.methodName = feature.methodName;
+            reset(this)
         end
         
         function addFrame(this, frame)
-            if this.frameIndex == 1
+             if this.frameIndex == 1
                 this.video = this.allocateOutputMemory(frame, this.numFrames);
-            end    
+                this.indexer = this.createIndexer(this.video);
+             end    
+            
             iFrame = this.frameIndex;
-            for i = 1:this.numFeatures
-                this.video(iFrame,i,:,:,:) = uint8(frame(:,:,i));
-            end
+            
+            this.video(this.indexer{:}, iFrame) = frame;
+            
             this.frameIndex = iFrame + 1;
+        end
+        
+        function reset(this)
+            this.frameIndex = 1;
         end
         
     end
@@ -47,9 +58,14 @@ classdef VideoIterator < handle
     methods (Static = true)
         
         function output = allocateOutputMemory(input, numFrames)
-            [height, width, numFeatures] = size(input);            
-            output = zeros(numFrames, numFeatures, height, width,'single');
+                [height, width, numFeatures] = size(input);
+                output = zeros(height, width, numFeatures, numFrames, 'single');
         end
+    
+       function colons = createIndexer(video)
+           numDims = numel(size(video));
+           colons = repmat({':'},1,numDims-1); 
+       end
         
     end
 end
