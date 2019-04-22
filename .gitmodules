@@ -12,3 +12,6 @@
     recurse = true
 	path = src/VideoFeatures
 	url = https://github.com/JasonJKi/VideoFeatures.git
+[submodule "src/VideoFeatures/VideoFeatures"]
+	path = src/VideoFeatures/VideoFeatures
+	url = https://github.com/JasonJKi/VideoFeatures.git
