@@ -1,6 +1,7 @@
-classdef Extractor < handle
-    %Extractor - 
-    %   Detailed explanation goes here
+classdef VideoFeatureExtractor < handle
+    % VideoFeatureExtractor - Time Series Feature Extractor 
+    %   The TSFeatureExtractor provides organized and computationally efficient
+    % way of performing feature extraction of timeseries video data.
     
     properties
         video
@@ -13,9 +14,12 @@ classdef Extractor < handle
         duration;
         numChannels;
         
-        videoFeatures = {};
-        numfeatures = 0;
+        method = {};
+        numMethods = 0;
+
+        features = {};
         resizeRatio = 1;
+        isResized =  false;
         
         iFrame = 1;
         
@@ -39,13 +43,24 @@ classdef Extractor < handle
     end
     
     methods
-        % Instantiate video feature extractor class 
-        function this = Extractor(video)
+        
+        % CONSTRUCTOR VideoFeatureExtractor(videoReader)
+        %
+        % CONSTRUCTOR VideoFeatureExtractor(videoArray) 
+        % videoArray - (NumFrames x height x width x numChannels)
+        %
+        % You could create a videoArray by
+        % video = initFromVideoReader(Video(), videoReader); % Create a Video object with preloaded videos
+        % vidFeatureExtractor = Extractor(videoReader); % Load video as extractor computes.
+        function this = VideoFeatureExtractor(video)
             if nargin < 1
                 return;
             end
-            
-            if isa(video, 'Video')                
+            initVideo(this, video)
+        end
+        
+        function initVideo(this, video)
+             if isa(video, 'Video')                
                 setVideoInfo(this, video);
             elseif isa(video, 'VideoReader') 
                 setVideoReaderInfo(this, video);
@@ -86,26 +101,20 @@ classdef Extractor < handle
         end
         
         function add(this, method)
+            this.method = [this.method, {method}];
             videoFeature = VideoIterator(method, this.numFrames);
-            this.videoFeatures = [this.videoFeatures, {videoFeature}];
-            this.numfeatures = this.numfeatures + 1;
+            this.features = [this.features, {videoFeature}];
+            this.numMethods = this.numMethods + 1;
         end
         
         function videoFeature = get(this, index)
             if nargin < 2
                 index = 1;
             end
-            videoFeature = this.videoFeatures{index};
+            videoFeature = this.features{index};
         end
         
-        function this = resizeImage(this,resizeRatio)
-            if resizeRatio <= 0
-                disp('Resize ratio cannot be 0 or a negative number')
-                return
-            end
-            this.imageResized = true;
-            this.resizeRatio = resizeRatio;
-        end
+      
         
         % Search for available feature extaction methods.
         function searchMethods(this, methodStr)
@@ -130,40 +139,65 @@ classdef Extractor < handle
         end
         
         function initExtractionMethods(this)
-            msg = sprintf('\nPerforming Extractions for \n');
+            msg = sprintf(['\nPerforming Extractions for '  this.video.Name '\n'] );
             fprintf(msg);
 
-            for iFeature = 1:this.numfeatures
-                vidFeature = this.videoFeatures{iFeature};
-                msg = sprintf(['%d. ' vidFeature.name,' ' , vidFeature.methodName, '\n'], iFeature);
+            for iFeature = 1:this.numMethods
+                vidFeature = this.features{iFeature};
+                msg = sprintf(['%d. ', vidFeature.methodName, '\n'], iFeature);
                 fprintf(msg)
                 reset(vidFeature);
             end
         end
         
         function Features = createFeatureOutput(this)
-            Features = cell(this.numfeatures,1);
-            for iFeature = 1:this.numfeatures
-                Features{iFeature} = VideoFeature(this.videoFeatures{iFeature}, this.numFrames);
+            Features = cell(this.numMethods,1);
+            for iFeature = 1:this.numMethods
+                Features{iFeature} = VideoFeature(this.features{iFeature}, this.numFrames);
+            end
+        end
+        
+        function resizeFrame(this, resizeRatio)
+            if resizeRatio ~= 1
+                this.isResized = true;
+                this.resizeRatio = resizeRatio;
+            end    
+        end
+        function frame = resize(this, frame)
+            if this.imageResized == true
+                frame = imresize(frame, this.resizeRatio);
             end
         end
         
         % Start the computation of the video feature extraction.
-        function compute(this)
-            
+        function compute(this, video)
+             if nargin > 1
+                initVideo(this, video)
+            end
             
             this.iFrame = 1;
             initExtractionMethods(this)
             
             while hasFrame(this.video)
-                frame = readFrame(this.video);
-                for iFeature = 1:this.numfeatures
-                    feature = get(this.videoFeatures{iFeature});
+                
+                % Read frame and resize if resizeRatio ~= 1.
+                frame = this.resize(readFrame(this.video));
+                
+                % Loop through all the feature extraction method for given
+                % frame.
+                for iFeature = 1:this.numMethods
+                    % Select feature extraction method.
+                    feature = get(this.features{iFeature});
+                    % Compute the select feature for the current frame.
                     output = feature.compute(frame);
-                    this.videoFeatures{iFeature}.addFrame(output);
+                    % Iterate the feature output into a video timeseries structure.
+                    this.features{iFeature}.addFrame(output);
                 end
                 
+                % Write status of frames processed in the command window.
                 statusMessage(this);
+                
+                % Count and index the frames.
                 this.iFrame = this.iFrame + 1;
             end
             

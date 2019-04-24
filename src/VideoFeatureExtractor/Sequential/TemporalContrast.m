@@ -2,7 +2,7 @@ classdef TemporalContrast < SequentialFeature
     %TemporalContrast Computes pixel difference of frames
     
     properties (Constant)
-        NAME = 'temporal_contrast'
+        NAME = 'temporalContrast';
     end
 
     properties (Access = public)
@@ -23,20 +23,19 @@ classdef TemporalContrast < SequentialFeature
     
     methods
         
-        function this = TemporalContrast(param)
-            setDefaultParam(this)
-            if (nargin > 1)
-                init(this, param)
-            end
+        function this = TemporalContrast()
+            init(this)
         end
         
-        function init(this, param)
-            this.param = param;
+        function init(this)
+            setDefaultParam(this)
         end
         
         function setDefaultParam(this)
             this.param = [];
             this.paramLabel = [];
+            this.method = this;
+            this.methodName = this.NAME;
             this.numOutputs = 1;
         end
         

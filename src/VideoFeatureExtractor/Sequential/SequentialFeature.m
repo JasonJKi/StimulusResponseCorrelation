@@ -18,7 +18,7 @@ classdef SequentialFeature < handle
         outputLabel
         
         numOutputs
-        method = 'None';
+        method
         methodName
     end
     

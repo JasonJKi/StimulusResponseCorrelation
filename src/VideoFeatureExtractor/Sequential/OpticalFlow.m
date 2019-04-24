@@ -2,7 +2,7 @@ classdef OpticalFlow < SequentialFeature
     %OpticalFlow Computes pixel difference of frames
     
     properties (Constant)
-        NAME = 'optical_flow';
+        NAME = 'opticalFlow';
     end
 
     properties (Access = public)
@@ -16,6 +16,7 @@ classdef OpticalFlow < SequentialFeature
     %    output;
     %    outputLabel;
     %    numOutputs;
+        
     end
     
     properties (Access = private)
@@ -25,18 +26,19 @@ classdef OpticalFlow < SequentialFeature
     methods
         
         function this = OpticalFlow(param)
-            setDefaultParam(this)            
             init(this, param)
         end
         
-        function init(this, param)
-            this.methodName = class(param);
-            this.param = param;
+        function init(this, method)
+            this.method = method;
+            this.methodName = ['opticFlow' class(method)];
             this.paramLabel = fieldnames(this.method);
+            this.numOutputs = 4;
         end
         
         function setDefaultParam(this)
             this.method = opticalFlowHS;
+            this.methodName = ['opticFlow' class(this.method)];
             this.paramLabel = fieldnames(this.method);
             this.numOutputs = 4;
         end

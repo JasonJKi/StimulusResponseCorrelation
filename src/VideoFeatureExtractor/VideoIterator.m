@@ -6,18 +6,20 @@ classdef VideoIterator < handle
         name
         param
         paramLabel
+        method
         methodName
         numFeatures
         numFrames
         
-        video
+        data
         
-        indexer
     end
+
     
     properties (Access = private, Hidden = true)
         frameIndex = 1
-        featureFieldNames 
+        featureFieldNames
+        indexer
     end
         
     methods
@@ -32,19 +34,20 @@ classdef VideoIterator < handle
             this.numFeatures = feature.numOutputs;
             this.paramLabel = feature.paramLabel;
             this.numFrames = numFrames;
+            this.method = feature.method;
             this.methodName = feature.methodName;
             reset(this)
         end
         
         function addFrame(this, frame)
              if this.frameIndex == 1
-                this.video = this.allocateOutputMemory(frame, this.numFrames);
-                this.indexer = this.createIndexer(this.video);
+                this.data = this.allocateOutputMemory(frame, this.numFrames);
+                this.indexer = this.createIndexer(this.data);
              end    
             
             iFrame = this.frameIndex;
             
-            this.video(this.indexer{:}, iFrame) = frame;
+            this.data(this.indexer{:}, iFrame) = frame;
             
             this.frameIndex = iFrame + 1;
         end

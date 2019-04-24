@@ -11,6 +11,7 @@ classdef Video < handle
         frameRate;
         duration;
         videoFormat;
+        Name = 'unknown';
         
         data;
         currentFrameIndex = 0;
@@ -19,12 +20,20 @@ classdef Video < handle
     end
     
     methods
-        function this = Video(video, frameRate)
+
+        %----------------------------------------------------------------------
+        % Constructor
+        %----------------------------------------------------------------------
+        function this = Video(video, frameRate, name)
             %VIDEO Construct a object for efficiently handling matlab array with video structure.
             % video (numFrames x height x width x numChannels)
             if nargin < 1
                 return
             end
+            if nargin > 2
+                this.Name = name;
+            end
+                
             this.data = video;
             setDimensions(video)
             setTimeInfo(frameRate, this.numFrames)
@@ -104,7 +113,7 @@ classdef Video < handle
             this.frameRate = video.FrameRate;
             this.duration = video.Duration;
             this.numFrames = video.Duration*video.FrameRate;
-            
+            this.Name = video.Name;
             if strcmp(video.VideoFormat,'Grayscale')
                 this.numChannels = 1;
             else

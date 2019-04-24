@@ -1,44 +1,40 @@
+clear all
 setup install
+%% Create a video object for the video stimulus.
+extractor = VideoFeatureExtractor();
+extractor.resizeFrame(1/4); % Set a resize ratio to downsample the video.
 
-% load in video stimulus data
-videoFilepath = 'res/data/video_1.avi'; 
+extractor.add(TemporalContrast());
+extractor.add(OpticalFlow(Farneback));
+% extractor.add(OpticalFlow(HS));
+% extractor.add(OpticalFlow(LK));
+% extractor.add(OpticalFlow(LKDoG));
 
-Farneback = opticalFlowFarneback('NumPyramidLevels', 3, ...
-    'PyramidScale', 0.5, 'NumIterations', 3, ...
-    'NeighborhoodSize', 5, 'FilterSize', 15);
+%% This dataset object assist in organizing features for multiple samples.
+dataset = Dataset(extractor);
+videoFileList = {'res/data/video_1.avi', 'res/data/video_2.avi'};
+for i = 1:numel(videoFileList)
+    
+    % Extract video features for each of the video.
+    % Use MATLAB's VideoReader to read in multimedia in real time.
+    extractor.compute(VideoReader(videoFileList{i})); 
+    % Alternatively, you can use extractor.compute(videoArray) if you have a pre computed matlab array.
+    
+    % Organize the dataset for each video feature computed using the dataset
+    % object.
+    dataset.add(extractor);
+end
 
-HS = opticalFlowHS('Smoothness', 1, 'MaxIteration', 10, 'VelocityDifference', 0);
-
-LK = opticalFlowLK('NoiseThreshold', 0.0039);
-
-LKDoG = opticalFlowLKDoG('NumFrames', 3, 'ImageFilterSigma', 1.5, ...
-    'GradientFilterSigma', 1, 'NoiseThreshold', 0.0039);
-
-% Create a video object for the video stimulus.
-% videoArray = initFromVideoReader(Video(), VideoReader(videoFilepath));
-% vidFeatureExtractor = Extractor(videoArray)
-
-videoReader = VideoReader(videoFilepath); % VideoReader is Matlab's multimedia reader.
-
-vidFeatureExtractor = Extractor(videoReader);
-vidFeatureExtractor.add(TemporalContrast());
-vidFeatureExtractor.add(OpticalFlow(Farneback));
-vidFeatureExtractor.add(OpticalFlow(HS));
-vidFeatureExtractor.add(OpticalFlow(LK));
-vidFeatureExtractor.add(OpticalFlow(LKDoG));
-
-vidFeatureExtractor.compute();
-
-temporalContrast = vidFeatureExtractor.get(1);
-opticFlow = vidFeatureExtractor.get(2);
-
-responseFilepath = 'res/data/eeg_1.mat';
-eeg = load(responseFilepath, 'duration', 'data', 'eventMarker', 'fs');
+%% Create index to perform leave one out cross validation 
+crossValDataSplitRatio = cellfun('length',dataset.timeseries.opticFlowFarneback);
+randomizeIndex = false;
+crossValIndex = timeseriesCrossValidation(nSamples,crossValDataSplitRatio, randomizeIndex);
+opticFlowMeanTRF = videoTRF(opticFlow, opticFlow.video);
 
 % Create a estimator to perform stimulus response correlation.
 kx = 10; ky = 10;
 ccaEstimator = CCA(xTrain, yTrain);
-ccaEstimator.setHyperParams(kx,ky);
+ccaEstimator.setHyperParams(kx, ky);
 ccaEstimator.compute();
 
 [rhos, p] = ccaEstimator.fit(xTest, yTest);
