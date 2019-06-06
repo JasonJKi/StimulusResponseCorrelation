@@ -1,24 +1,12 @@
 function p = makeGBVSParams()
- 
 p = {};
-
 %%%%%%%%%%%%% general  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-p.methodName = 'gbvs_visual_salience';
 p.salmapmaxsize = 32;             % size of output saliency maps (maximum dimension)
                                   % don't set this too high (e.g., >60)
                                   % if you want a saliency map at the
                                   % original image size, just used rescaled
                                   % saliency map
                                   % (out.master_map_resized in gbvs())
-
-p.verbose = 0;                    % turn status messages on (1) / off (0)
-p.verboseout = 'screen';          % = 'screen' to echo messages to screen
-                                  % = 'myfile.txt' to echo messages to file                                   
-
-p.saveInputImage = 0;             % save input image in output struct
-                                  % (can be convenient, but is wasteful
-                                  %  to store uncompressed image data
-                                  %  around)
 
 p.blurfrac = 0.02;                % final blur to apply to master saliency map
                                   % (in standard deviations of gaussian kernel,
@@ -50,9 +38,9 @@ p.flickerWeight = 1;
 p.motionWeight = 1;
 p.dklcolorWeight = 1;
 
-p.gaborangles = [ 0 45 90 135 ];  % angles of gabor filters
-p.contrastwidth = .1;             % fraction of image width = length of square side over which luminance variance is 
-                                  % computed for 'contrast' feature map
+p.gaborangles = [0 45 90 135];  % angles of gabor filters
+
+p.contrastwidth = .1;             % fraction of image width = length of square side over which luminance variance is % computed for 'contrast' feature map
                                   % LARGER values will give SMOOTHER
                                   %   contrast maps
 
@@ -67,14 +55,14 @@ p.flickerNewFrameWt = 1;          % (should be between 0.0 and 1.0)
                                   % w == set previous frame to w * present
                                   %      + (1-w) * previous estimate
                                   
-p.motionAngles = [ 0 45 90 135 ]; 
+p.motionAngles = [0 45 90 135]; 
                                   % directions of motion for motion channel
                                   %  --> 0 , /^ 45 , |^ 90 , ^\ 135 , etc. 
                                   % question: should use more directions?
                                   % e.g., 180, 225, 270, 315, ?
                                   
 %%%%%%%%%%%%% GBVS parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                                  
+p.isGBVS = true;                                  
 p.unCenterBias = 0;               % turned off (0) by default. Attempts to undo some emergent
                                   % center bias in GBVS (by pointwise-multiplying final saliency map by 
                                   % an inverse-bias map).
@@ -103,24 +91,20 @@ p.tol = .0001;                    % tol controls a stopping rule on the computat
 
 p.cyclic_type = 2;                % this should *not* be changed (non-cyclic boundary rules)
                                   
-%%%%%%%%%% Parameters to use Itti/Koch and/or Simpler Saliency Algorith %%%%
-                                  
-                                  
-p.useIttiKochInsteadOfGBVS = 0;   % use value '0' for Graph-Based Visual Saliency
-                                  % use value '1' for Itti Koch algorithm: 
-                                  % "A Model of Saliency-Based Visual
+%%%%%%%%%% Parameters to use Itti/Koch and/or Simpler Saliency Algorith %%%%                                   
+p.isIttiKoch = true;              %  "A Model of Saliency-Based Visual
                                   % Attention for Rapid Scene Analysis",
-                                  % PAMI 1998
+                                  % PAMI 1998                  
                                   
-p.activationType = 1;             % 1 = graph-based activation (default)
-                                  % 2 = center-surround activation (given
+p.activationType = 'graph-based'; % 1. 'graph-based' = graph-based activation (default)
+                                  % 2. 'center-surround' = center-surround activation (given
                                   %     by ittiCenter/DeltaLevels below)
                                   % ( type 2 used if useIttiKoch..= 1 )
 
 
-p.normalizationType = 1;          % 1 = simplest & fastest. raises map values to a power before adding them together (default)
-                                  % 2 = graph-based normalization scheme (no longer recommended)
-                                  % 3 = normalization by (M-m)^2, where M =
+p.normalizationType = 'simple';   % 1. 'simple' simplest & fastest. raises map values to a power before adding them together (default)
+                                  % 2. 'gb-norm' graph-based normalization scheme (no longer recommended)
+                                  % 3. 'glob-local-max' normalization by (M-m)^2, where M =
                                   %     global maximum. m = avg. of local
                                   %     maxima
                                   % ( type 3 used if useIttiKoch..=1 )

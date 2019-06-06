@@ -1,32 +1,28 @@
 function [rawfeatmaps, motionInfo] = getFeatureMaps( img , param , prevMotionInfo )
-
-%
 % this computes feature maps for each cannnel in featureChannels/
-%
-
 load mypath;
 
-%%%%
-%%%% STEP 1 : form image pyramid and prune levels if pyramid levels get too small.
-%%%%
-
-%mymessage(param,'forming image pyramid\n');
-
-levels = [ 2 : param.maxcomputelevel ];
-
-is_color = (size(img,3) == 3);
+% STEP 1 : form image pyramid and prune levels if pyramid levels get too small.
+levels = 2:param.maxcomputelevel;
+isColor = (size(img,3) == 3);
 imgr = []; imgg = []; imgb = [];
-if ( is_color ) [imgr,imgg,imgb,imgi] = mygetrgb( img );
-else imgi = img; end
+
+if isColor 
+    [imgr,imgg,imgb,imgi] = mygetrgb( img );
+else
+    imgi = img; 
+end
 
 imgL = {};
 imgL{1} = mySubsample(imgi);
-imgR{1} = mySubsample(imgr); imgG{1} = mySubsample(imgg); imgB{1} = mySubsample(imgb);
+imgR{1} = mySubsample(imgr); 
+imgG{1} = mySubsample(imgg); 
+imgB{1} = mySubsample(imgb);
 
 for i=levels
 
     imgL{i} = mySubsample( imgL{i-1} );
-    if ( is_color )
+    if ( isColor )
         imgR{i} = mySubsample( imgR{i-1} );
         imgG{i} = mySubsample( imgG{i-1} );
         imgB{i} = mySubsample( imgB{i-1} );
@@ -53,23 +49,17 @@ else
     end
 end
     
-%%%
-%%% STEP 2 : compute feature maps
-%%%
-
-%mymessage(param,'computing feature maps...\n');
-
+% STEP 2 : compute feature maps
 rawfeatmaps = {};
 
-%%% get channel functions in featureChannels/directory
-
+% get channel functions in featureChannels/directory
 channel_files = dir( [pathroot '/util/featureChannels/*.m'] );
 
 motionInfo.imgShifts = {};
 
 for ci = 1 : length(channel_files)
   
-    %%% parse the channel letter and name from filename
+    % parse the channel letter and name from filename
     parts = regexp( channel_files(ci).name , '^(?<letter>\w)_(?<rest>.*?)\.m$' , 'names');
     if ( isempty(parts) ), continue; end % invalid channel file name
     
@@ -78,8 +68,8 @@ for ci = 1 : length(channel_files)
     channelfunc = str2func(sprintf('%s_%s',channelLetter,channelName));
     useChannel = sum(param.channels==channelLetter) > 0;
 
-    if ( ((channelLetter == 'C') || (channelLetter=='D')) && useChannel && (~is_color) )
-        %mymessage(param,'oops! cannot compute color channel on black and white image. skipping this channel\n');
+    if ( ((channelLetter == 'C') || (channelLetter=='D')) && useChannel && (~isColor) )
+        %Cannot compute color channel on black and white image. skipping this channel\n');
         continue;
     elseif (useChannel)
 

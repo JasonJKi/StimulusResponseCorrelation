@@ -1,6 +1,5 @@
-classdef VisualSalience < ImageFeature
-    %VISUALSALIENCE Summary of this class goes here
-    %   Detailed explanation goes here
+classdef GBVS < ImageFeature
+    %Graph Based Visual Salience
     
     properties (Constant)
         NAME = 'GBVS';

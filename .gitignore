@@ -1,5 +1,5 @@
 ## .gitignore
-
+data/
 tmp/
 *.asv
 # for stimulus and video data 

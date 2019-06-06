@@ -8,9 +8,8 @@ classdef SequentialFeature < handle
     properties (Access = public)
         isReset = true
         
-        img
-        imgPrev
-        
+        image
+        imagePrev = [];
         param
         paramLabel
 
@@ -34,24 +33,24 @@ classdef SequentialFeature < handle
                 
         function setInput(this, img1, img0)
             this.imgPrev = img1;
-            this.img = img0;
+            this.image = img0;
         end
         
         function [img0, img1] = getInput(this)
-            img0 = this.imgPrev;
-            img1 = this.img;
+            img0 = this.imagePrev;
+            img1 = this.image;
         end
         
-        function setInitImage(this, img)
+        function setInitImage(this, image)
             if this.isReset
-                [heigth, width, numChannel] = size(img);
-                this.imgPrev = zeros(heigth, width, 'uint8');
+                [heigth, width, numChannel] = size(image);
+                this.imagePrev = zeros(heigth, width, 'uint8');
                 this.isReset = false;
             end
         end
         
-        function setPrevImage(this, img)            
-            this.imgPrev = img;
+        function setPrevImage(this, image)            
+            this.imagePrev = image;
         end
         
         function setOutput(this, output)
@@ -71,12 +70,9 @@ classdef SequentialFeature < handle
         end
         
         function reset(this)
-            setDefaultParam(this);
-            setInput(this, [], []);
-            
-            this.output = [];
-            this.outputLabel = [];
+            this.imagePrev = [];
         end
+        
     end
     
     

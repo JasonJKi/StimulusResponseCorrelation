@@ -6,21 +6,9 @@ classdef OpticalFlow < SequentialFeature
     end
 
     properties (Access = public)
-    % declared in super class SequentialFeature  
-    %    img
-    %    imgPrev
-    
-    %    params;
-    %    paramsLabel;
-    % 
-    %    output;
-    %    outputLabel;
-    %    numOutputs;
-        
     end
     
     properties (Access = private)
-        imagePrev = [];
     end
     
     methods
@@ -41,19 +29,23 @@ classdef OpticalFlow < SequentialFeature
             this.methodName = ['opticFlow' class(this.method)];
             this.paramLabel = fieldnames(this.method);
             this.numOutputs = 4;
+            this.outputLabel = {'vx', 'vy', 'theta', 'magnitude'};
         end
         
         function output = compute(this, img)
             setInitImage(this, img)
+            
             img1 = convertToGrayImage(img);
 
             flow = estimateFlow(this.method, img1); 
-            output = convertOpticFlowOutput(this, flow);
+            
+            output = getOutput(this, flow);
+            
             this.setPrevImage(img1)
         end
-        
-        function reset(this)
-            this.imagePrev = [];
+                
+        function output = getOutput(this, computedValue)
+            output = convertOpticFlowOutput(this, computedValue);
         end
         
         function output = convertOpticFlowOutput(this, flow)

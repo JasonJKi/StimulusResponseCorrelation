@@ -90,7 +90,6 @@ classdef VideoFeatureExtractor < handle
             this.width =  video.Height;
             this.frameRate = video.FrameRate;
             this.duration = video.Duration;
-            
             this.numFrames = video.Duration*video.FrameRate;
             
             if strcmp(video.VideoFormat, 'Grayscale')
@@ -163,6 +162,7 @@ classdef VideoFeatureExtractor < handle
                 this.resizeRatio = resizeRatio;
             end    
         end
+        
         function frame = resize(this, frame)
             if this.imageResized == true
                 frame = imresize(frame, this.resizeRatio);

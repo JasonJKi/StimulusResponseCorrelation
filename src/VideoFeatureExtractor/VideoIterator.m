@@ -10,6 +10,7 @@ classdef VideoIterator < handle
         methodName
         numFeatures
         numFrames
+        outputLabel
         
         data
         
@@ -36,6 +37,8 @@ classdef VideoIterator < handle
             this.numFrames = numFrames;
             this.method = feature.method;
             this.methodName = feature.methodName;
+            this.outputLabel = feature.outputLabel;
+
             reset(this)
         end
         

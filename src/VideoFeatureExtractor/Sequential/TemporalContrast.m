@@ -6,19 +6,9 @@ classdef TemporalContrast < SequentialFeature
     end
 
     properties (Access = public)
-    % Declared in super class SequentialFeature  
-    %    img
-    %    imgPrev
-    
-    %    params;
-    %    paramsLabel;
-    % 
-    %    output;
-    %    outputLabel;
     end
     
     properties (Access = private)
-        imagePrev = [];
     end
     
     methods
@@ -37,16 +27,17 @@ classdef TemporalContrast < SequentialFeature
             this.method = this;
             this.methodName = this.NAME;
             this.numOutputs = 1;
+            this.outputLabel = 'temporalContrast';
         end
         
-        function output = compute(this, img)
-            setInitImage(this, img)
-            img0 = this.imgPrev;
-            img1 = convertToGrayImage(img);
+        function output = compute(this, image)
+            setInitImage(this, image)
+            image0 = this.imagePrev;
+            image1 = convertToGrayImage(image);
 
-            output = this.temporalContrast(img1, img0);
+            output = this.temporalContrast(image1, image0);
             setOutput(this, output);
-            setPrevImage(this, img1);
+            setPrevImage(this, image1);
         end
        
         function reset(this)
@@ -58,8 +49,8 @@ classdef TemporalContrast < SequentialFeature
     
     methods (Static = true)
         
-        function output = temporalContrast(img1, img0)
-            output = abs(img1 - img0);
+        function output = temporalContrast(image1, image0)
+            output = abs(image1 - image0);
         end
         
     end
