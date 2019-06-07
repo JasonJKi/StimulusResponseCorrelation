@@ -8,10 +8,10 @@ extractor.add(DirectionalMotion([0 45 90 135]));
 
 extractor.add(TemporalContrast());
 extractor.add(OpticalFlow(Farneback));
-extractor.add(VisualSalience(param))
-% extractor.add(OpticalFlow(HS));
-% extractor.add(OpticalFlow(LK));
-% extractor.add(OpticalFlow(LKDoG));
+extractor.add(VisualSalience()); % To use this function install gvbs package. cd lib/gbvs/ and run gbvs_install.m
+extractor.add(OpticalFlow(HS));
+extractor.add(OpticalFlow(LK));
+extractor.add(OpticalFlow(LKDoG));
 
 %% The TSDataset object organizes multiple independent timeseries data.
 dataset = TSDataset(extractor);

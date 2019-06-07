@@ -35,8 +35,8 @@ classdef Video < handle
             end
                 
             this.data = video;
-            setDimensions(video)
-            setTimeInfo(frameRate, this.numFrames)
+            setDimensions(this, video)
+            setTimeInfo(this, frameRate, this.numFrames)
         end
         
         function setDimensions(this, video)

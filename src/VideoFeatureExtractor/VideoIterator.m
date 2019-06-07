@@ -13,7 +13,9 @@ classdef VideoIterator < handle
         outputLabel
         
         data
-        
+        isPooling = false;
+        kernelSize;
+        thisPoolWindowIndx
     end
 
     
@@ -42,13 +44,27 @@ classdef VideoIterator < handle
             reset(this)
         end
         
+        function init(this, frame)
+            [height, width, numFeatures] = size(frame);
+            if this.isPooling
+                kernel = this.kernelSize;
+                this.thisPoolWindowIndx = kron(reshape(1:(height*width/(kernel^2)),width/kernel,[])',ones(kernel));
+                [height, width] = poolSize(height, width, kernel);
+            end
+            this.data = this.allocateOutputMemory(height, width, this.numFrames, numFeatures);
+            this.indexer = this.createIndexer(this.data);
+        end
+        
         function addFrame(this, frame)
-             if this.frameIndex == 1
-                this.data = this.allocateOutputMemory(frame, this.numFrames);
-                this.indexer = this.createIndexer(this.data);
-             end    
+            if this.frameIndex == 1
+                init(this, frame)
+            end    
             
             iFrame = this.frameIndex;
+            
+            if this.isPooling
+                frame = pooling(frame, this.kernelSize, @max, this.thisPoolWindowIndx);
+            end
             
             this.data(this.indexer{:}, iFrame) = frame;
             
@@ -63,15 +79,15 @@ classdef VideoIterator < handle
     
     methods (Static = true)
         
-        function output = allocateOutputMemory(input, numFrames)
-                [height, width, numFeatures] = size(input);
-                output = zeros(height, width, numFeatures, numFrames, 'single');
+        function output = allocateOutputMemory(height, width, numFeatures, numFrames)
+                output = zeros(height, width, numFrames, numFeatures, 'single');
         end
     
        function colons = createIndexer(video)
            numDims = numel(size(video));
            colons = repmat({':'},1,numDims-1); 
        end
+           
         
     end
 end

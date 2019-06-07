@@ -211,6 +211,4 @@ out.map_types = map_types;
 out.intermed_maps = intermed_maps;
 out.rawfeatmaps = rawfeatmaps;
 out.paramsUsed = param;
-if ( param.saveInputImage )
-    out.inputimg = img;
-end
+

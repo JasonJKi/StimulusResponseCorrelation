@@ -1,4 +1,4 @@
-function videoFeature = computeVideoFeature(func, video, kernel,preview)
+function videoFeature = computeVideoFeature(func, video, kernel, preview)
 
 if nargin <3
     kernel = 0;
@@ -26,14 +26,14 @@ end
 
 if kernel
     [h, w] = poolSize(height,width,kernel);
-    poolIndx = poolIndex(height,width,kernel);
-    videoFeature = zeros(h,w,nFrames,dataType);
+    poolIndx = kron(reshape(1:(height*width/(kernel^2)),width/kernel,[])',ones(kernel));
+    videoFeature = zeros(h, w, nFrames, dataType);
 else
-    videoFeature = zeros(height,width,nFrames,dataType);
+    videoFeature = zeros(height, width, nFrames, dataType);
 end
 
-img1 = zeros(height,width,dataType);
-img2 = zeros(height,width,dataType);
+img1 = zeros(height, width, dataType);
+img2 = zeros(height, width, dataType);
 for i=1:nFrames
     
     if i > 1

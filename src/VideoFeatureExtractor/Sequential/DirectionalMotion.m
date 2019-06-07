@@ -9,7 +9,8 @@ classdef DirectionalMotion < SequentialFeature
     end
     
     properties (Access = private)
-        shiftPrev = [];
+        prevImage = [];
+        prevImageShift = [];
         orientationAngles = [];   
     end
     
@@ -43,37 +44,31 @@ classdef DirectionalMotion < SequentialFeature
         end
 
         function setPrevImage(this, image)
-            setInitImage(this, image);
-            [height, width] = size(image);
-            if isempty(this.shiftPrev)
-                this.shiftPrev = zeros(height, width, this.numOutputs, 'uint8');
-            end
+            
         end
 
         function output = compute(this, image)
             image = double(rgbIntensity(image));
-            setPrevImage(this, image)
-            prevImg = double(this.imagePrev);
-            prevShift = double(this.shiftPrev);
+            
+            if isempty(this.prevImage)
+                [height, width] = size(image);
+                this.prevImage = zeros(height, width);
+                this.prevImageShift = zeros(height, width, this.numOutputs);
+            end
             
             map = [];
             for i = 1:this.numOutputs
                 angle = this.orientationAngles(i);
                 imageShift(:,:,i) = this.shiftImage(image, angle);
-                map(:,:,i) = abs(image .* prevShift(:,:,i) - prevImg .* imageShift(:,:,i));
+                prevShift = this.prevImageShift(:,:,i);
+                map(:,:,i) = abs(image .* prevShift - this.prevImage .* imageShift(:,:,i));
             end
             
+            this.prevImage = image;
+            this.prevImageShift = imageShift;
             output = map;
-            this.shiftPrev = imageShift;            
-            this.setPrevImage(image)            
         end
-        
-        function initOutputStruct(this)
-            this.OutputStruct.Map = [];
-            %             this.OutputStruct.ImageShift = [];
-
-        end
-        
+       
         function reset(this)
             this.imagePrev = [];
             this.imageShift = [];

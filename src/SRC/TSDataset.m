@@ -86,7 +86,7 @@ classdef TSDataset < handle
             end
             
             data = this.timeseries(index);
-            save([this.outputDir '/' filename], '-struct', 'data'), 
+            save([this.outputDir filename '_features'], '-struct', 'data'), 
         end
     end
 end

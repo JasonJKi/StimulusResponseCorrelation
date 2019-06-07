@@ -25,7 +25,7 @@ classdef GBVS < ImageFeature
     
     methods
         
-        function this = VisualSalience(methodParam)
+        function this = GBVS(methodParam)
             this.methodName = methodParam.methodName;
             init(this, methodParam);
             initOutputStruct(this);

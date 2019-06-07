@@ -70,7 +70,6 @@ while hasFrame(videoObj)
     video(i,:,:,:) = frame;
     videoGray(i,:,:) = frameGray;
     i = i+1;
-    disp(i)
 end
 
 if boolGray
@@ -80,4 +79,5 @@ end
 if boolSave
    save(outpath,'video','videoObj')
 end
-    
+end
+

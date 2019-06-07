@@ -20,7 +20,8 @@ classdef VideoFeatureExtractor < handle
         features = {};
         resizeRatio = 1;
         isResized =  false;
-        
+        isPooling = false;
+        kernelSize = 5;
         iFrame = 1;
         
     end
@@ -102,6 +103,11 @@ classdef VideoFeatureExtractor < handle
         function add(this, method)
             this.method = [this.method, {method}];
             videoFeature = VideoIterator(method, this.numFrames);
+            if this.isPooling
+                videoFeature.isPooling = true;
+                videoFeature.kernelSize = this.kernelSize;
+            end
+            
             this.features = [this.features, {videoFeature}];
             this.numMethods = this.numMethods + 1;
         end
@@ -137,12 +143,13 @@ classdef VideoFeatureExtractor < handle
             this.currentFrameIndex = 1;
         end
         
-        function initExtractionMethods(this)
+        function initCompute(this)
             msg = sprintf(['\nPerforming Extractions for '  this.video.Name '\n'] );
             fprintf(msg);
 
             for iFeature = 1:this.numMethods
                 vidFeature = this.features{iFeature};
+                this.features{iFeature}.numFrames = this.numFrames;
                 msg = sprintf(['%d. ', vidFeature.methodName, '\n'], iFeature);
                 fprintf(msg)
                 reset(vidFeature);
@@ -163,6 +170,15 @@ classdef VideoFeatureExtractor < handle
             end    
         end
         
+        function pool(this, bool, kernelSize)
+            this.isPooling = bool;
+            
+            if nargin < 3
+                return
+            end
+            this.kernelSize = kernelSize;
+        end
+        
         function frame = resize(this, frame)
             if this.imageResized == true
                 frame = imresize(frame, this.resizeRatio);
@@ -176,7 +192,7 @@ classdef VideoFeatureExtractor < handle
             end
             
             this.iFrame = 1;
-            initExtractionMethods(this)
+            initCompute(this)
             
             while hasFrame(this.video)
                 
@@ -185,6 +201,7 @@ classdef VideoFeatureExtractor < handle
                 
                 % Loop through all the feature extraction method for given
                 % frame.
+                 
                 for iFeature = 1:this.numMethods
                     % Select feature extraction method.
                     feature = get(this.features{iFeature});
@@ -193,7 +210,6 @@ classdef VideoFeatureExtractor < handle
                     % Iterate the feature output into a video timeseries structure.
                     this.features{iFeature}.addFrame(output);
                 end
-                
                 % Write status of frames processed in the command window.
                 statusMessage(this);
                 
@@ -208,10 +224,18 @@ classdef VideoFeatureExtractor < handle
                this.messageStr = '';
             end
             
-            if ~mod(this.iFrame,100) || (this.iFrame == 1) || this.iFrame == this.numFrames
+            if ~mod(this.iFrame,50) || (this.iFrame == 1) || this.iFrame == this.numFrames
                 msg = sprintf('Processed %d/%d Frames', this.iFrame, this.numFrames);
                 fprintf([this.messageStr, msg]);
                 this.messageStr = repmat(sprintf('\b'), 1, length(msg));
+            end
+        end
+        
+        function save(this, filename)
+            for i = 1:this.numMethods
+                feature = this.get(i);
+                fieldname = this.get(i).methodName;
+                save([filename '_' fieldname],'feature'),
             end
         end
         
