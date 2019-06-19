@@ -13,11 +13,12 @@ end
 if nargin < 4
     [h, w] = poolSize(height,width,kernel);
     poolIndx = kron(reshape(1:(height*width/(kernel^2)),width/kernel,[])',ones(kernel));
-    videoFeature = zeros(h, w, nFrames, dataType);
 end
 
 %   Detailed explanation goes here
-imgPooled = zeros(round(height/kernel),round(width/kernel),'uint8');
-accumulatedArray = accumarray(poolIndx(:),img(:),[],method);
-imgPooled = reshape(accumulatedArray, width/kernel, []).';
+imgPooled = zeros(round(height/kernel),round(width/kernel),nChannels,'uint8');
+for i = 1:nChannels
+    image = img(:,:,i);
+    imgPooled(:,:,i) = reshape(accumarray(poolIndx(:),image(:),[],method),width/kernel,[]).';
+end
 

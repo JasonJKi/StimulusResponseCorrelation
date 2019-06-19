@@ -3,7 +3,8 @@ classdef TSDataset < handle
     %   Detailed explanation goes here
     
     properties
-        timeseries = struct();        
+        data = struct(); 
+        filenames = {};
         numSamples = 0;
         outputDir;
     end
@@ -15,7 +16,7 @@ classdef TSDataset < handle
     methods
         function this = TSDataset(input)
             if isa(input, 'VideoFeatureExtractor')
-                initVFEDataset(this, input)
+                 initVFEDataset(this, input)
             end
         end
         
@@ -23,7 +24,7 @@ classdef TSDataset < handle
             for i = 1:extractor.numMethods
                 fieldname = extractor.get(i).methodName;
                 outputlabel = extractor.get(i).outputLabel;
-                add(this, [], fieldname, extractor.frameRate, outputlabel, 'videoFeatures')
+                add(this, [], fieldname, extractor.frameRate, outputlabel)
             end
         end
         
@@ -33,30 +34,25 @@ classdef TSDataset < handle
                 data = shiftdim(feature.data,  ndims(feature.data)-1);
                 fieldname = extractor.get(i).methodName;
                 outputLabel = extractor.get(i).outputLabel;
-                add(this, data, fieldname, extractor.frameRate, outputLabel, 'videoFeatures')
+                add(this, data, fieldname, extractor.frameRate, outputLabel)
             end
         end
         
-        function add(this, data, fieldname, fs, outputlabel, fileType)
-            this.timeseries(this.iter).(fieldname).data = data;
-            this.timeseries(this.iter).(fieldname).fs = fs;
-            this.timeseries(this.iter).(fieldname).length = size(data,1);
+        function add(this, data, fieldname, fs, outputlabel)
+            this.data(this.iter).(fieldname).timeseries = data;
+            this.data(this.iter).(fieldname).fs = fs;
+            this.data(this.iter).(fieldname).shape = size(data);
             
             if nargin < 5
                 outputlabel = fieldname;
             end
-            
-            if nargin < 6
-                fileType = fieldname;
-            end
 
-            
-            this.timeseries(this.iter).(fieldname).outputlabel = outputlabel;
-            this.timeseries(this.iter).(fieldname).fileType = fileType;
+            this.data(this.iter).(fieldname).outputlabel = outputlabel;            
         end
         
-        function setName(this, filename)
-            this.timeseries(this.iter).filename = filename;
+        
+        function setFilename(this, filename)
+            this.filenames{this.iter} = filename;            
         end
         
         function filename = getName(this, iter)
@@ -68,8 +64,8 @@ classdef TSDataset < handle
         
         function next(this, iter)
             if nargin > 1
-                this.iter = iter + 1;
                 this.numSamples = iter;
+                this.iter = iter + 1;
                 return
             end
             this.iter = this.iter + 1;
@@ -88,6 +84,23 @@ classdef TSDataset < handle
             data = this.timeseries(index);
             save([this.outputDir filename '_features'], '-struct', 'data'), 
         end
+        
+        function X = videoTRF(this,fieldname,fs)
+            for i = 1:length(this.data)
+                x = this.data(i).(fieldname).timeseries;
+                for ii = 1:size(x, 4)
+                    X{i,ii} = videoTRF(x(:,:,:,ii), fs);
+                end
+            end
+        end
+        
+        function X = toCell(this, fieldname)
+            for i = 1:length(this.data)
+                x = this.data(i).(fieldname).timeseries;
+                X{i,1} = x;
+            end
+        end
+        
     end
 end
 

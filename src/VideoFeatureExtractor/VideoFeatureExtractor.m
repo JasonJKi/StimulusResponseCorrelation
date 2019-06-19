@@ -107,10 +107,15 @@ classdef VideoFeatureExtractor < handle
                 videoFeature.isPooling = true;
                 videoFeature.kernelSize = this.kernelSize;
             end
-            
-            this.features = [this.features, {videoFeature}];
+            set(this, videoFeature)
             this.numMethods = this.numMethods + 1;
         end
+        
+        function set(this, feature)
+            this.features = [this.features, {feature}];
+        end
+        
+       
         
         function videoFeature = get(this, index)
             if nargin < 2
@@ -118,9 +123,7 @@ classdef VideoFeatureExtractor < handle
             end
             videoFeature = this.features{index};
         end
-        
-      
-        
+                
         % Search for available feature extaction methods.
         function searchMethods(this, methodStr)
             index = strcmp(this.availableMethods, methodStr);
@@ -230,12 +233,20 @@ classdef VideoFeatureExtractor < handle
                 this.messageStr = repmat(sprintf('\b'), 1, length(msg));
             end
         end
-        
+       
         function save(this, filename)
             for i = 1:this.numMethods
                 feature = this.get(i);
                 fieldname = this.get(i).methodName;
                 save([filename '_' fieldname],'feature'),
+            end
+        end
+        
+        function load(this, filename)
+            for i = 1:this.numMethods
+                fieldname = this.get(i).methodName;
+                load([filename '_' fieldname],'feature')
+                this.features{i} = feature;
             end
         end
         
