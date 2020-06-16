@@ -48,10 +48,10 @@ classdef VideoIterator < handle
             [height, width, numFeatures] = size(frame);
             if this.isPooling
                 kernel = this.kernelSize;
-                this.thisPoolWindowIndx = kron(reshape(1:(height*width/(kernel^2)),width/kernel,[])',ones(kernel));
+                this.thisPoolWindowIndx = poolIndex(height,width,kernel);
                 [height, width] = poolSize(height, width, kernel);
             end
-            this.data = this.allocateOutputMemory(height, width, this.numFrames, numFeatures);
+            this.data = this.allocateOutputMemory(this.numFrames, height, width, numFeatures);
             this.indexer = this.createIndexer(this.data);
         end
         
@@ -66,7 +66,7 @@ classdef VideoIterator < handle
                 frame = pooling(frame, this.kernelSize, @max, this.thisPoolWindowIndx);
             end
             
-            this.data(this.indexer{:}, iFrame) = frame;
+            this.data(iFrame, this.indexer{:}) = frame;
             
             this.frameIndex = iFrame + 1;
         end
@@ -75,12 +75,25 @@ classdef VideoIterator < handle
             this.frameIndex = 1;
         end
         
+        function preview(this)
+            figure
+            for i = 1:this.numFrames
+                for ii = 1:this.numFeatures
+                    frame = squeeze(this.data(:,:,ii,i));
+                    subplot(2,2,ii)
+                    imagesc(frame)
+                    pause(.0001)
+                end
+            end
+            close
+        end
+        
     end
     
     methods (Static = true)
         
-        function output = allocateOutputMemory(height, width, numFeatures, numFrames)
-                output = zeros(height, width, numFrames, numFeatures, 'single');
+        function output = allocateOutputMemory(numFrames, height, width, numFeatures)
+                output = zeros(numFrames, height, width, numFeatures, 'single');
         end
     
        function colons = createIndexer(video)

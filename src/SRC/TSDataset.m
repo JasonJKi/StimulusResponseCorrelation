@@ -15,8 +15,10 @@ classdef TSDataset < handle
     
     methods
         function this = TSDataset(input)
-            if isa(input, 'VideoFeatureExtractor')
+            if nargin > 0
+                if isa(input, 'VideoFeatureExtractor')
                  initVFEDataset(this, input)
+                end
             end
         end
         

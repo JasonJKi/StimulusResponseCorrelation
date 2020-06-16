@@ -200,7 +200,8 @@ classdef VideoFeatureExtractor < handle
             while hasFrame(this.video)
                 
                 % Read frame and resize if resizeRatio ~= 1.
-                frame = this.resize(readFrame(this.video));
+                frame = readFrame(this.video);
+                frame = this.resize(frame);
                 
                 % Loop through all the feature extraction method for given
                 % frame.
@@ -253,6 +254,7 @@ classdef VideoFeatureExtractor < handle
         function reset(this)
             this.currentFrameIndex = [];
         end
+
         
     end
     

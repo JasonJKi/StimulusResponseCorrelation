@@ -5,9 +5,9 @@ if nargin <3
 end
 
 if ndims(video) > 4
-    [height, width, nChannels, nFrames] = size(video);
+    [nFrames, height, width, nChannels] = size(video);
 else
-    [height, width, nFrames] = size(video);
+    [nFrames, height, width] = size(video);
     nChannels = 1;
 end
 
@@ -26,23 +26,23 @@ end
 
 if kernel
     [h, w] = poolSize(height,width,kernel);
-    poolIndx = kron(reshape(1:(height*width/(kernel^2)),width/kernel,[])',ones(kernel));
-    videoFeature = zeros(h, w, nFrames, dataType);
+    poolIndx = poolIndex(height,width,kernel);
+    videoFeature = zeros(nFrames, h, w, dataType);
 else
-    videoFeature = zeros(height, width, nFrames, dataType);
+    videoFeature = zeros(nFrames, height, width, dataType);
 end
 
 img1 = zeros(height, width, dataType);
 img2 = zeros(height, width, dataType);
 for i=1:nFrames
     
-    if i > 1
+   if i > 1
         if nChannels > 1
-            frame1 = rgb2gray(video(:,:,:,i-1));
-            frame2 = rgb2gray(video(:,:,:,i));
+            frame1 = rgb2gray(squeeze(video(i-1,:,:,:)));
+            frame2 = rgb2gray(squeeze(video(i,:,:,:)));
         else
-            frame1 = video(:,:,i-1);
-            frame2 = video(:,:,i);
+            frame1 = squeeze(video(i-1,:,:));
+            frame2 = squeeze(video(i,:,:));
         end
         img1=single(frame1);
         img2=single(frame2);
@@ -57,9 +57,11 @@ for i=1:nFrames
     end
     
     if preview
-        disp(['frame number: ' num2str(i)])
+        disp(['frame number: ' num2str(i)]);
         previewFrame(frame,currentAxes);
+        pause(.001);
+
     end
     
-    videoFeature(:,:,i) = frame;
+    videoFeature(i,:,:) = frame;
 end

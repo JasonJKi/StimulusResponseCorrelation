@@ -1,20 +1,37 @@
-function [ videoOut ] = videoPool(video, kernelSize)
+function [ videoOut ] = videoPool(video, kernel, preview)
 
-[numFrames, height, width, numChannels] = size(video);
 if nargin < 2
-    kernelSize = [5 5];
+    kernel = 0;
 end
 
-% [h, w] = poolSize(height, width, kernelSize);
-% poolIndx = poolIndex(height, width, kernelSize);
-% dataType = 'single';
-% videoOut = zeros(h, w, nFrames, dataType);
-
-for iFrame = 1:numFrames
-    frame = squeeze(video(iFrame,:,:,:));
-    videoOut(iFrame,:,:,:) = sepblockfun(frame,kernelSize,'max');
-%     videoOut = pooling(frame, kernel, @max, poolIndx);    
+if ndims(video) > 3
+    [nFrames, height, width, nChannels] = size(video);
+else
+    [nFrames, height, width] = size(video);
+    nChannels = 1;
 end
 
+dataType = 'single';
+% pre-allocate features
+if nargin < 3
+    preview = 0;
+end
+
+[hResized, wResized] = poolSize(height,width,kernel);
+poolIndx = poolIndex(height,width,kernel);
+videoOut = zeros(nFrames, hResized, wResized,dataType);
+
+
+for i=1:nFrames
+    
+    frame = squeeze(video(i,:,:,:));
+    frame = pooling(frame,kernel,@max,poolIndx);
+    
+    if preview
+        disp(['frame number: ' num2str(i)]);
+        imagesc(frame)
+        pause(.001);
+    end
+    videoOut(i,:,:) = frame;
 end
 

@@ -22,12 +22,12 @@ end
 if preview 
     currentAxes = axes;
 end
-if kernel;
-    [h w] = poolSize(height,width,kernel);
+if kernel
+    [hResized, wResized] = poolSize(height,width,kernel);
     poolIndx = poolIndex(height,width,kernel);
-    opticFlow=zeros(h,w,nFrames,dataType);
+    opticFlow=zeros(nFrames, hResized, wResized,dataType);
 else
-    opticFlow=zeros(height,width,nFrames,dataType);
+    opticFlow=zeros(nFrames, height,width,dataType);
 end
 
 img1 = zeros(height,width,dataType);
@@ -47,26 +47,30 @@ for i=1:nFrames
     end
     
     % optical flow
-    opticFlow_ = step(opticFlowModel,img2,img1);
-%      flow = estimateFlow(opticalFlowHS,img1);
-%      opticFlow__ = flow.Magnitude;
-%      sum(opticFlow__ - opticFlow_)
-     
+    flow = step(opticFlowModel,img2,img1);
+
+    % opticFlowModel2 = vision.OpticalFlow('ReferenceFrameSource','Input port');
+    % opticFlowModel2.OutputValue = 'Horizontal and vertical components in complex form';
+
+    % flow2 = step(opticFlowModel2, img2, img1);
+    % flow2_ = abs(flow2).^2;
+    
     % perform max pooling downsample
-    if kernel 
-        opticFlow_ = pooling(opticFlow_,kernel,@max,poolIndx);
+    if kernel >1
+        flow = pooling(flow,kernel,@max,poolIndx);
     end
     
     if preview
-        disp(['frame number: ' num2str(i)])
-        previewFrame(opticFlow_, currentAxes);
-        pause(.001)
+        disp(['frame number: ' num2str(i)]);
+        previewFrame(flow, currentAxes);
+        pause(.001);
     end
     
-    opticFlow(i,:,:) = opticFlow_;
+    opticFlow(i,:,:) = flow;
 end
 
 return 
+
 vidReader = VideoReader('viptraffic.avi');
 opticFlow = opticalFlowLK('NoiseThreshold',0.009);
 

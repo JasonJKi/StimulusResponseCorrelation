@@ -1,8 +1,8 @@
 function grayVideo = rgb2grayVideo(rgbVideo)
 %RGB2GRAYVIDEO Convert rgb video to gray scale
-[height, width, ~, nFrames] = size(rgbVideo);
-grayVideo = zeros(height,width,nFrames,'uint8');
+[nFrames, height, width, ~] = size(rgbVideo);
+grayVideo = zeros(nFrames,height,width,'uint8');
 for i = 1:nFrames
-    grayVideo(i,:,:,:) = rgb2gray(rgbVideo(i,:,:,:));
-end
+    frame = squeeze(rgbVideo(i,:,:,:));
+    grayVideo(i,:,:,:) = rgb2gray(frame);
 end

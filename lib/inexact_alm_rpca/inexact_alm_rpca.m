@@ -28,7 +28,7 @@ function [A_hat E_hat iter] = inexact_alm_rpca(D, lambda, tol, maxIter)
 % Copyright: Perception and Decision Laboratory, University of Illinois, Urbana-Champaign
 %            Microsoft Research Asia, Beijing
 
-addpath PROPACK;
+% addpath PROPACK;
 
 [m n] = size(D);
 
@@ -57,9 +57,9 @@ Y = Y / dual_norm;
 
 A_hat = zeros( m, n);
 E_hat = zeros( m, n);
-mu = 1.25/norm_two % this one can be tuned
-mu_bar = mu * 1e7
-rho = 1.5          % this one can be tuned
+mu = 1.25/norm_two; % this one can be tuned
+mu_bar = mu * 1e7;
+rho = 1.5;          % this one can be tuned
 d_norm = norm(D, 'fro');
 
 iter = 0;
@@ -102,11 +102,11 @@ while ~converged
         converged = true;
     end    
     
-    if mod( total_svd, 10) == 0
-        disp(['#svd ' num2str(total_svd) ' r(A) ' num2str(rank(A_hat))...
-            ' |E|_0 ' num2str(length(find(abs(E_hat)>0)))...
-            ' stopCriterion ' num2str(stopCriterion)]);
-    end    
+%     if mod( total_svd, 10) == 0
+%         disp(['#svd ' num2str(total_svd) ' r(A) ' num2str(rank(A_hat))...
+%             ' |E|_0 ' num2str(length(find(abs(E_hat)>0)))...
+%             ' stopCriterion ' num2str(stopCriterion)]);
+%     end    
     
     if ~converged && iter >= maxIter
         disp('Maximum iterations reached') ;

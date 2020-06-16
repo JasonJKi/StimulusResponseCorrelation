@@ -1,4 +1,4 @@
-function [eegOut, mask] = removeSpatialArtifact( eeg, scaleStd, show)
+function [eegOut, mask] = removeSpatialArtifact( eeg, stdScale, show)
 %REMOVEEEGARTIFACT Summary of this function goes here
 % remove artifact 
 % [eeg mask] = rejectEegArtifact(eeg,nRemove,sRemove,fs)
@@ -10,7 +10,7 @@ if nargin < 3; show = 0; end
 
 eegOut = eeg;
 % step 2: artifact rejection by channel
-rejectionThreshold = nanstd(eeg, [], 2)* scaleStd;
+rejectionThreshold = nanstd(eeg, 2)* stdScale;
 threshMatrix = repmat(rejectionThreshold,[1 nDimensions]);
 indexSpaceArtifact = double(abs(eegOut) > threshMatrix);
 eegOut(indexSpaceArtifact>0)=nan;

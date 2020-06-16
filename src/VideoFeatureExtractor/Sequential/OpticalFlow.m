@@ -49,14 +49,10 @@ classdef OpticalFlow < SequentialFeature
         end
         
         function output = convertOpticFlowOutput(this, flow)
-            vx = flow.Vx;
-            vy = flow.Vy;
-            theta = flow.Orientation;
-            magnitude = flow.Magnitude;
-            output(:,:,1) = single(vx);
-            output(:,:,2) = single(vy);
-            output(:,:,3) = single(theta);
-            output(:,:,4) = single(magnitude);
+%             vx = flow.Vx;
+%             vy = flow.Vy;
+            output = flow.Magnitude;
+            
             this.output = output;
         end
         
